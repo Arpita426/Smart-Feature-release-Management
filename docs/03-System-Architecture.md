@@ -1,15 +1,21 @@
-# System Architecture
+# Product Hierarchy
 
 ```mermaid
 graph TD
 
-A[Organization]
+ORG[Organization]
 
-A --> B[Members]
-A --> C[Projects]
+ORG --> USERS[Users]
 
-C --> D[Environments]
+ORG --> PROJECT[Projects]
 
-D --> E[Feature Flags]
-D --> F[Audit Logs]
+PROJECT --> MEMBER[Project Members]
+
+PROJECT --> ENV[Environments]
+
+ENV --> FLAG[Feature Flags]
+
+FLAG --> CONFIG[Feature Configuration]
+
+FLAG --> AUDIT[Audit Logs]
 ```
