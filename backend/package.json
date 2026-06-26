@@ -1,17 +1,19 @@
 {
-  "name": "backend",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "smart-feature-release-management-backend",
+  "version": "0.1.0",
+  "main": "dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "dev": "tsx watch src/server.ts",
+  "build": "tsc",
+  "start": "node dist/server.js",
+  "typecheck": "tsc --noEmit",
+  "lint": "eslint .",
+  "format": "prettier --write ."
+},
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "typescript": "^6.0.3"
-  },
+  "author": "Arpita Vekariya",
+  "license": "MIT",
+  "description": "Production-ready Feature Flag Management Platform built with TypeScript, Express, MongoDB and Redis.",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
@@ -24,5 +26,17 @@
     "morgan": "^1.11.0",
     "redis": "^6.0.1",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^26.0.1",
+    "eslint": "^10.5.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.5",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.3"
   }
 }
