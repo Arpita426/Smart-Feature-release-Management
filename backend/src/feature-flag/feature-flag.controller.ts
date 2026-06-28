@@ -83,8 +83,28 @@ updateRolloutPercentage = async (
 
     const result =
       await this.featureFlagService.updateRolloutPercentage(
-        req.params.id,
-        data.rolloutPercentage
+    req.params.id,
+    data.rolloutPercentage,
+    req.user!.userId
+);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+getFeatureFlagsByProject = async (
+  req: Request<{ projectId: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result =
+      await this.featureFlagService.getFeatureFlagsByProject(
+        req.params.projectId
       );
 
     res.status(200).json({

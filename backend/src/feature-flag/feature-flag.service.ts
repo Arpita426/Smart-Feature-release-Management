@@ -12,6 +12,7 @@ import { CreateFeatureFlagInput } from './feature-flag.validation';
 import { FeatureFlagStatus } from './feature-flag-status';
 import { AuditRepository } from '../audit/audit.repository';
 import { AuditAction } from '../audit/audit-action';
+import { AuditEntity } from '../audit/audit-entity';
 
 export class FeatureFlagService {
   private featureFlagRepository = new FeatureFlagRepository();
@@ -61,7 +62,7 @@ export class FeatureFlagService {
     await this.auditRepository.create(
   new Types.ObjectId(userId),
   AuditAction.CREATE_FEATURE_FLAG,
-  'FeatureFlag',
+  AuditEntity.FEATURE_FLAG,
   featureFlag._id
 );
     return {
@@ -147,7 +148,7 @@ async toggleFeatureFlag(
     await this.auditRepository.create(
   new Types.ObjectId(featureFlag.createdBy),
   AuditAction.TOGGLE_FEATURE_FLAG,
-  'FeatureFlag',
+  AuditEntity.FEATURE_FLAG,
   featureFlag._id
 );
   return {
@@ -157,7 +158,8 @@ async toggleFeatureFlag(
 }
 async updateRolloutPercentage(
   id: string,
-  rolloutPercentage: number
+  rolloutPercentage: number,
+  userId: string
 ) {
   const featureFlag =
     await this.featureFlagRepository.findById(id);
@@ -171,12 +173,41 @@ async updateRolloutPercentage(
       id,
       rolloutPercentage
     );
-
+    //
+await this.auditRepository.create(
+  new Types.ObjectId(userId),
+  AuditAction.UPDATE_ROLLOUT,
+  AuditEntity.FEATURE_FLAG,
+  featureFlag._id
+);
   return {
     id: updatedFeatureFlag!._id.toString(),
     rolloutPercentage:
       updatedFeatureFlag!.rolloutPercentage,
   };
+}
+async getFeatureFlagsByProject(projectId: string) {
+  const project =
+    await this.projectRepository.findById(projectId);
+
+  if (!project) {
+    throw new NotFoundError('Project not found');
+  }
+
+  const featureFlags =
+    await this.featureFlagRepository.findByProject(
+      projectId
+    );
+
+  return featureFlags.map((featureFlag) => ({
+    id: featureFlag._id.toString(),
+    name: featureFlag.name,
+    key: featureFlag.key,
+    description: featureFlag.description,
+    status: featureFlag.status,
+    rolloutPercentage: featureFlag.rolloutPercentage,
+    createdAt: featureFlag.createdAt,
+  }));
 }
 private hashUserId(userId: string): number {
   let hash = 0;
