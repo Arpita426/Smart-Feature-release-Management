@@ -51,4 +51,16 @@ export class FeatureFlagRepository {
     }
   );
 }
+async updateRolloutPercentage(
+  id: string,
+  rolloutPercentage: number
+) {
+  return FeatureFlag.findByIdAndUpdate(
+    id,
+    { rolloutPercentage },
+    {
+      new: true,
+    }
+  );
+}
 }

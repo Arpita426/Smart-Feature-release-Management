@@ -136,6 +136,29 @@ async toggleFeatureFlag(id: string) {
     status: updatedFeatureFlag!.status,
   };
 }
+async updateRolloutPercentage(
+  id: string,
+  rolloutPercentage: number
+) {
+  const featureFlag =
+    await this.featureFlagRepository.findById(id);
+
+  if (!featureFlag) {
+    throw new NotFoundError('Feature flag not found');
+  }
+
+  const updatedFeatureFlag =
+    await this.featureFlagRepository.updateRolloutPercentage(
+      id,
+      rolloutPercentage
+    );
+
+  return {
+    id: updatedFeatureFlag!._id.toString(),
+    rolloutPercentage:
+      updatedFeatureFlag!.rolloutPercentage,
+  };
+}
 private hashUserId(userId: string): number {
   let hash = 0;
 

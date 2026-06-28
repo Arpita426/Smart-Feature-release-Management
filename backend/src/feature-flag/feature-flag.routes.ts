@@ -12,6 +12,11 @@ router.get(
   featureFlagController.evaluateFeatureFlag
 );
 router.patch(
+  '/:id/rollout',
+  authenticate,
+  featureFlagController.updateRolloutPercentage
+);
+router.patch(
   '/:id/toggle',
   authenticate,
   featureFlagController.toggleFeatureFlag
