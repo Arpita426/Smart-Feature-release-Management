@@ -16,6 +16,11 @@ router.get(
   authenticate,
   featureFlagController.getFeatureFlagsByProject
 );
+router.get(
+  '/:id',
+  authenticate,
+  featureFlagController.getFeatureFlagById
+);
 router.patch(
   '/:id/rollout',
   authenticate,

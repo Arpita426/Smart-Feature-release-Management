@@ -115,4 +115,23 @@ getFeatureFlagsByProject = async (
     next(error);
   }
 };
+getFeatureFlagById = async (
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result =
+      await this.featureFlagService.getFeatureFlagById(
+        req.params.id
+      );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 }

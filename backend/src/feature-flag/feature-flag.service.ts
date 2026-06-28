@@ -209,6 +209,27 @@ async getFeatureFlagsByProject(projectId: string) {
     createdAt: featureFlag.createdAt,
   }));
 }
+async getFeatureFlagById(id: string) {
+  const featureFlag =
+    await this.featureFlagRepository.findById(id);
+
+  if (!featureFlag) {
+    throw new NotFoundError('Feature flag not found');
+  }
+
+  return {
+    id: featureFlag._id.toString(),
+    name: featureFlag.name,
+    key: featureFlag.key,
+    description: featureFlag.description,
+    status: featureFlag.status,
+    rolloutPercentage: featureFlag.rolloutPercentage,
+    projectId: featureFlag.projectId,
+    createdBy: featureFlag.createdBy,
+    createdAt: featureFlag.createdAt,
+    updatedAt: featureFlag.updatedAt,
+  };
+}
 private hashUserId(userId: string): number {
   let hash = 0;
 
