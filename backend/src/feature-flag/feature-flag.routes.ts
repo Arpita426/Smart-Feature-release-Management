@@ -31,6 +31,11 @@ router.patch(
   authenticate,
   featureFlagController.toggleFeatureFlag
 );
+router.delete(
+  '/:id',
+  authenticate,
+  featureFlagController.deleteFeatureFlag
+);
 router.post(
   '/',
   authenticate,

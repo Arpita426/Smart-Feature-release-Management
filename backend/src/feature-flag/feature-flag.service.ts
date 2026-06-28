@@ -230,6 +230,20 @@ async getFeatureFlagById(id: string) {
     updatedAt: featureFlag.updatedAt,
   };
 }
+async deleteFeatureFlag(id: string) {
+  const featureFlag =
+    await this.featureFlagRepository.findById(id);
+
+  if (!featureFlag) {
+    throw new NotFoundError('Feature flag not found');
+  }
+
+  await this.featureFlagRepository.delete(id);
+
+  return {
+    message: 'Feature flag deleted successfully',
+  };
+}
 private hashUserId(userId: string): number {
   let hash = 0;
 
