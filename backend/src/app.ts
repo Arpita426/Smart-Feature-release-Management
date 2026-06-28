@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import authRoutes from './auth/auth.routes';
 import { errorHandler } from './middleware/error.middleware';
 import organizationRoutes from './organization/organization.routes';
+import projectRoutes from './project/project.routes';
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(helmet());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/organizations', organizationRoutes);
+app.use('/api/v1/projects', projectRoutes);
 app.use(errorHandler);
 
 
