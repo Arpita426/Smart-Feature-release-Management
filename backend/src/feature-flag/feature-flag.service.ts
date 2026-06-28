@@ -67,4 +67,82 @@ export class FeatureFlagService {
       createdAt: featureFlag.createdAt,
     };
   }
+
+  async evaluateFeatureFlag(
+  projectId: string,
+  key: string,
+  userId: string
+) {
+  // Find feature flag
+  const featureFlag =
+    await this.featureFlagRepository.findByProjectAndKey(
+      projectId,
+      key
+    );
+
+  if (!featureFlag) {
+    throw new NotFoundError('Feature flag not found');
+  }
+
+  // Feature disabled
+  if (featureFlag.status === FeatureFlagStatus.DISABLED) {
+    return {
+      enabled: false,
+    };
+  }
+
+  // 100% rollout
+  if (featureFlag.rolloutPercentage >= 100) {
+    return {
+      enabled: true,
+    };
+  }
+
+  // 0% rollout
+  if (featureFlag.rolloutPercentage <= 0) {
+    return {
+      enabled: false,
+    };
+  }
+
+  // Deterministic rollout
+  const hash = this.hashUserId(userId);
+
+  return {
+    enabled: hash < featureFlag.rolloutPercentage,
+  };
+}
+async toggleFeatureFlag(id: string) {
+  const featureFlag =
+    await this.featureFlagRepository.findById(id);
+
+  if (!featureFlag) {
+    throw new NotFoundError('Feature flag not found');
+  }
+
+  const newStatus =
+    featureFlag.status === FeatureFlagStatus.ENABLED
+      ? FeatureFlagStatus.DISABLED
+      : FeatureFlagStatus.ENABLED;
+
+  const updatedFeatureFlag =
+    await this.featureFlagRepository.toggleStatus(
+      id,
+      newStatus
+    );
+
+  return {
+    id: updatedFeatureFlag!._id.toString(),
+    status: updatedFeatureFlag!.status,
+  };
+}
+private hashUserId(userId: string): number {
+  let hash = 0;
+
+  for (const ch of userId) {
+    hash += ch.charCodeAt(0);
+  }
+
+  return hash % 100;
+}
 }

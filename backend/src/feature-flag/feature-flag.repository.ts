@@ -1,4 +1,5 @@
 import { FeatureFlag, IFeatureFlag } from './feature-flag.model';
+import { FeatureFlagStatus } from './feature-flag-status';
 
 export class FeatureFlagRepository {
   async create(data: Partial<IFeatureFlag>) {
@@ -37,4 +38,17 @@ export class FeatureFlagRepository {
   async delete(id: string) {
     return FeatureFlag.findByIdAndDelete(id);
   }
+
+  async toggleStatus(
+  id: string,
+  status: FeatureFlagStatus
+) {
+  return FeatureFlag.findByIdAndUpdate(
+    id,
+    { status },
+    {
+      new: true,
+    }
+  );
+}
 }

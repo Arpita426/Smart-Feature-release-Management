@@ -27,4 +27,46 @@ export class FeatureFlagController {
       next(error);
     }
   };
+
+  evaluateFeatureFlag = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { projectId, key, userId } = req.query;
+
+    const result = await this.featureFlagService.evaluateFeatureFlag(
+      projectId as string,
+      key as string,
+      userId as string
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+toggleFeatureFlag = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const result = await this.featureFlagService.toggleFeatureFlag(
+  req.params.id as string
+);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 }

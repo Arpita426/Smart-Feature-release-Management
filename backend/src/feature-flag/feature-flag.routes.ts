@@ -6,6 +6,16 @@ const router = Router();
 
 const featureFlagController = new FeatureFlagController();
 
+router.get(
+  '/evaluate',
+  authenticate,
+  featureFlagController.evaluateFeatureFlag
+);
+router.patch(
+  '/:id/toggle',
+  authenticate,
+  featureFlagController.toggleFeatureFlag
+);
 router.post(
   '/',
   authenticate,
