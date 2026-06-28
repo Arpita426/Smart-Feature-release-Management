@@ -10,10 +10,13 @@ import { ProjectRepository } from '../project/project.repository';
 import { FeatureFlagRepository } from './feature-flag.repository';
 import { CreateFeatureFlagInput } from './feature-flag.validation';
 import { FeatureFlagStatus } from './feature-flag-status';
+import { AuditRepository } from '../audit/audit.repository';
+import { AuditAction } from '../audit/audit-action';
 
 export class FeatureFlagService {
   private featureFlagRepository = new FeatureFlagRepository();
   private projectRepository = new ProjectRepository();
+  private auditRepository = new AuditRepository();
 
   async createFeatureFlag(
     featureFlagData: CreateFeatureFlagInput,
@@ -55,7 +58,12 @@ export class FeatureFlagService {
       rolloutPercentage:
         featureFlagData.rolloutPercentage ?? 0,
     });
-
+    await this.auditRepository.create(
+  new Types.ObjectId(userId),
+  AuditAction.CREATE_FEATURE_FLAG,
+  'FeatureFlag',
+  featureFlag._id
+);
     return {
       id: featureFlag._id.toString(),
       name: featureFlag.name,
