@@ -120,7 +120,12 @@ export class FeatureFlagService {
     enabled: hash < featureFlag.rolloutPercentage,
   };
 }
-async toggleFeatureFlag(id: string) {
+//async toggleFeatureFlag(id: string) 
+async toggleFeatureFlag(
+  id: string,
+  userId: string
+)
+{
   const featureFlag =
     await this.featureFlagRepository.findById(id);
 
@@ -138,7 +143,13 @@ async toggleFeatureFlag(id: string) {
       id,
       newStatus
     );
-
+    ///
+    await this.auditRepository.create(
+  new Types.ObjectId(featureFlag.createdBy),
+  AuditAction.TOGGLE_FEATURE_FLAG,
+  'FeatureFlag',
+  featureFlag._id
+);
   return {
     id: updatedFeatureFlag!._id.toString(),
     status: updatedFeatureFlag!.status,

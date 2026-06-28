@@ -57,9 +57,11 @@ toggleFeatureFlag = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const result = await this.featureFlagService.toggleFeatureFlag(
-  req.params.id as string
-);
+   const result =
+  await this.featureFlagService.toggleFeatureFlag(
+    req.params.id as string,
+    req.user!.userId
+  );
 
 
     res.status(200).json({
