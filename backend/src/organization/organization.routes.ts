@@ -12,4 +12,28 @@ router.post(
   organizationController.createOrganization
 );
 
+router.get(
+  '/',
+  authenticate,
+  organizationController.listOrganizations
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  organizationController.getOrganizationById
+);
+
+router.patch(
+  '/:id',
+  authenticate,
+  organizationController.updateOrganization
+);
+
+router.get(
+  '/:id/members',
+  authenticate,
+  organizationController.getOrganizationMembers
+);
+
 export default router;

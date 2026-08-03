@@ -30,7 +30,7 @@ async findByOrganization(
   return OrganizationMember.find({
     organizationId,
   })
-    .populate('userId', 'name email')
+    .populate('userId', 'fullName email')
     .sort({ createdAt: 1 });
 }
 

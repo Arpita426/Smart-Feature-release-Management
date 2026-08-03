@@ -44,13 +44,47 @@ export class AuthController {
   }
 };
 
-profile = (
+profile = async (
   req: Request,
-  res: Response
-): void => {
-  res.status(200).json({
-    success: true,
-    data: req.user,
-  });
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const profile = await this.authService.getProfile(req.user!.userId);
+
+    res.status(200).json({
+      success: true,
+      data: profile,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
+
+  lookup = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const email = req.query.email as string | undefined;
+
+      if (!email) {
+        res.status(400).json({
+          success: false,
+          message: 'email query parameter is required',
+        });
+        return;
+      }
+
+      const result = await this.authService.lookupUserByEmail(email);
+
+      res.status(200).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

@@ -12,4 +12,22 @@ router.post(
   projectController.createProject
 );
 
+router.get(
+  '/',
+  authenticate,
+  projectController.listProjects
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  projectController.getProjectById
+);
+
+router.patch(
+  '/:id',
+  authenticate,
+  projectController.updateProject
+);
+
 export default router;

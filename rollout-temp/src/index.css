@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-ink: #0f1417;
+  --color-ink-soft: #131a1e;
+  --color-panel: #161d22;
+  --color-panel-raised: #1e2730;
+  --color-line: #2a333b;
+  --color-line-soft: #222b31;
+
+  --color-paper: #edeae3;
+  --color-paper-dim: #b7bdc2;
+  --color-muted: #8b96a1;
+  --color-faint: #5b656e;
+
+  --color-amber: #e8912d;
+  --color-amber-soft: #7a5220;
+  --color-teal: #4fb8a6;
+  --color-teal-soft: #1f4640;
+  --color-clay: #c9584b;
+  --color-clay-soft: #4a2621;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    background: var(--color-ink);
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232, 145, 45, 0.06), transparent),
+      linear-gradient(var(--color-line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-line-soft) 1px, transparent 1px);
+    background-size: 100% 100%, 48px 48px, 48px 48px;
+    background-attachment: fixed, fixed, fixed;
+    background-position: 0 0, 0 0, 0 0;
+  }
+
+  body::before {
+    content: "";
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: var(--color-amber);
+    color: var(--color-ink);
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 2px;
+  }
+
+  input, select, textarea {
+    background: var(--color-panel-raised);
+    color: var(--color-paper);
+  }
+}
+
+@layer utilities {
+  .font-mono-nums {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Rocker-style toggle for feature flags */
+.rocker {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--color-panel-raised);
+  border: 1px solid var(--color-line);
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+  flex-shrink: 0;
+}
+
+.rocker[data-on="true"] {
+  background: var(--color-teal-soft);
+  border-color: var(--color-teal);
+}
+
+.rocker[data-on="false"] {
+  background: var(--color-clay-soft);
+  border-color: var(--color-clay);
+}
+
+.rocker .rocker-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--color-paper);
+  transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.rocker[data-on="true"] .rocker-knob {
+  transform: translateX(24px);
+  background: var(--color-teal);
+}
+
+.rocker[data-on="false"] .rocker-knob {
+  transform: translateX(0);
+  background: var(--color-clay);
+}
+
+/* Segmented signal meter for rollout percentage */
+.signal-meter {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 3px;
+  width: 100%;
+}
+
+.signal-meter .segment {
+  height: 18px;
+  border-radius: 1px;
+  background: var(--color-panel-raised);
+  border: 1px solid var(--color-line);
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.signal-meter .segment[data-lit="true"] {
+  background: var(--color-amber);
+  border-color: var(--color-amber);
+}

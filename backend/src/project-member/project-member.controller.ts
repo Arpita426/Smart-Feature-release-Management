@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler';
 import { ProjectMemberService } from './project-member.service';
 import { ProjectRole } from './project-role';
+import { serializeDoc, serializeDocs } from '../utils/serialize';
 
 export class ProjectMemberController {
   private projectMemberService =
@@ -22,7 +23,7 @@ export class ProjectMemberController {
 
       res.status(201).json({
         success: true,
-        data: member,
+        data: serializeDoc(member),
       });
     }
   );
@@ -39,7 +40,7 @@ export class ProjectMemberController {
 
       res.status(200).json({
         success: true,
-        data: members,
+        data: serializeDocs(members),
       });
     }
   );
@@ -60,7 +61,7 @@ export class ProjectMemberController {
 
       res.status(200).json({
         success: true,
-        data: member,
+        data: serializeDoc(member),
       });
     }
   );

@@ -19,4 +19,8 @@ export class AuthRepository {
       lastLogin: new Date(),
     });
   }
+
+  async findById(userId: string): Promise<IUser | null> {
+    return User.findById(userId);
+  }
 }

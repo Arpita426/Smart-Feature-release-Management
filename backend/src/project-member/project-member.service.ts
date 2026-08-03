@@ -7,7 +7,7 @@ import { OrganizationMemberRepository } from '../organization-member/organizatio
 import { ConflictError } from '../errors/ConflictError';
 import { NotFoundError } from '../errors/NotFoundError';
 import { UnauthorizedError } from '../errors/UnauthorizedError';
-
+import { ForbiddenError } from '../errors/ForbiddenError';
 import { OrganizationRole } from '../organization-member/organization-role';
 import { ProjectRole } from './project-role';
 
@@ -142,10 +142,21 @@ async getProjectMembers(
     );
   }
 
-  await this.getAuthorizedOrganizationAdmin(
-    project.organizationId.toString(),
-    requestedBy
+  // await this.getAuthorizedOrganizationAdmin(
+  //   project.organizationId.toString(),
+  //   requestedBy
+  // );
+  const member =
+  await this.organizationMemberRepository.findMember(
+      project.organizationId.toString(),
+      requestedBy
   );
+
+if (!member) {
+    throw new ForbiddenError(
+    "You are not allowed..."
+);
+}
 
   return this.projectMemberRepository.findByProject(
     projectId

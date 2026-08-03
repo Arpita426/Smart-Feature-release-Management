@@ -13,5 +13,10 @@ router.get(
   authenticate,
   authController.profile
 );
+router.get(
+  '/users/lookup',
+  authenticate,
+  authController.lookup
+);
 
-export default router;
+export default router;

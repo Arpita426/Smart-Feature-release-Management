@@ -11,7 +11,7 @@ import { ProjectRole } from '../project-member/project-role';
 import { OrganizationMemberRepository } from '../organization-member/organization-member.repository';
 import { OrganizationRole } from '../organization-member/organization-role';
 import { UnauthorizedError } from '../errors/UnauthorizedError';
-//import { Types } from 'mongoose';
+import { serializeDoc, serializeDocs } from '../utils/serialize';
 
 export class ProjectService {
   private projectRepository = new ProjectRepository();
@@ -84,13 +84,89 @@ if (
   role: ProjectRole.OWNER,
   addedBy: new Types.ObjectId(userId),
 });
-    return {
-      id: project._id.toString(),
-      name: project.name,
-      slug: project.slug,
-      description: project.description,
-      organizationId: project.organizationId,
-      createdAt: project.createdAt,
-    };
+    return serializeDoc(project)!;
+  }
+
+  async listProjectsByOrganization(organizationId: string, userId: string) {
+    const organization =
+      await this.organizationRepository.findById(organizationId);
+
+    if (!organization) {
+      throw new NotFoundError('Organization not found');
+    }
+
+    const organizationMember =
+      await this.organizationMemberRepository.findMember(
+        organizationId,
+        userId
+      );
+
+    if (!organizationMember) {
+      throw new UnauthorizedError(
+        'You are not a member of this organization.'
+      );
+    }
+
+    const projects =
+      await this.projectRepository.findByOrganization(organizationId);
+
+    return serializeDocs(projects);
+  }
+
+  async getProjectById(projectId: string, userId: string) {
+    const project = await this.projectRepository.findById(projectId);
+
+    if (!project) {
+      throw new NotFoundError('Project not found');
+    }
+
+    const organizationMember =
+      await this.organizationMemberRepository.findMember(
+        project.organizationId.toString(),
+        userId
+      );
+
+    if (!organizationMember) {
+      throw new UnauthorizedError(
+        'You are not a member of this organization.'
+      );
+    }
+
+    return serializeDoc(project)!;
+  }
+
+  async updateProject(
+    projectId: string,
+    data: { name?: string; description?: string },
+    userId: string
+  ) {
+    const project = await this.projectRepository.findById(projectId);
+    if (!project) {
+      throw new NotFoundError('Project not found');
+    }
+
+    const orgMember = await this.organizationMemberRepository.findMember(
+      project.organizationId.toString(),
+      userId
+    );
+
+    if (!orgMember) {
+      throw new UnauthorizedError('You are not a member of this organization.');
+    }
+
+    const projMember = await this.projectMemberRepository.findMember(
+      projectId,
+      userId
+    );
+
+    const isOrgAdminOrOwner = orgMember.role === OrganizationRole.OWNER || orgMember.role === OrganizationRole.ADMIN;
+    const isProjOwner = projMember && projMember.role === ProjectRole.OWNER;
+
+    if (!isOrgAdminOrOwner && !isProjOwner) {
+      throw new UnauthorizedError('You are not allowed to update this project.');
+    }
+
+    const updated = await this.projectRepository.update(projectId, data);
+    return serializeDoc(updated!)!;
   }
 }

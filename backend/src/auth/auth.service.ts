@@ -6,6 +6,9 @@ import { LoginInput } from './auth.validation';
 import { UnauthorizedError } from '../errors/UnauthorizedError';
 import { comparePassword } from '../utils/password';
 import { generateAccessToken } from '../utils/jwt';
+import { NotFoundError } from '../errors/NotFoundError';
+import { serializeDoc } from '../utils/serialize';
+
 export class AuthService {
   private authRepository = new AuthRepository();
 
@@ -69,5 +72,29 @@ await this.authRepository.updateLastLogin(userId);
     },
   };
 }
+
+  async getProfile(userId: string) {
+    const user = await this.authRepository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    return serializeDoc(user);
+  }
+
+  async lookupUserByEmail(email: string) {
+    const user = await this.authRepository.findByEmail(email);
+
+    if (!user) {
+      throw new NotFoundError('User with this email not found');
+    }
+
+    return {
+      _id: user._id.toString(),
+      fullName: user.fullName,
+      email: user.email,
+    };
+  }
 }
 

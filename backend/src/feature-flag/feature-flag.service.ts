@@ -13,6 +13,7 @@ import { FeatureFlagStatus } from './feature-flag-status';
 import { AuditRepository } from '../audit/audit.repository';
 import { AuditAction } from '../audit/audit-action';
 import { AuditEntity } from '../audit/audit-entity';
+import { serializeDoc, serializeDocs } from '../utils/serialize';
 
 export class FeatureFlagService {
   private featureFlagRepository = new FeatureFlagRepository();
@@ -65,16 +66,7 @@ export class FeatureFlagService {
   AuditEntity.FEATURE_FLAG,
   featureFlag._id
 );
-    return {
-      id: featureFlag._id.toString(),
-      name: featureFlag.name,
-      key: featureFlag.key,
-      description: featureFlag.description,
-      status: featureFlag.status,
-      rolloutPercentage: featureFlag.rolloutPercentage,
-      projectId: featureFlag.projectId,
-      createdAt: featureFlag.createdAt,
-    };
+    return serializeDoc(featureFlag)!;
   }
 
   async evaluateFeatureFlag(
@@ -151,10 +143,7 @@ async toggleFeatureFlag(
   AuditEntity.FEATURE_FLAG,
   featureFlag._id
 );
-  return {
-    id: updatedFeatureFlag!._id.toString(),
-    status: updatedFeatureFlag!.status,
-  };
+  return serializeDoc(updatedFeatureFlag!)!;
 }
 async updateRolloutPercentage(
   id: string,
@@ -180,11 +169,7 @@ await this.auditRepository.create(
   AuditEntity.FEATURE_FLAG,
   featureFlag._id
 );
-  return {
-    id: updatedFeatureFlag!._id.toString(),
-    rolloutPercentage:
-      updatedFeatureFlag!.rolloutPercentage,
-  };
+  return serializeDoc(updatedFeatureFlag!)!;
 }
 async getFeatureFlagsByProject(projectId: string) {
   const project =
@@ -199,15 +184,7 @@ async getFeatureFlagsByProject(projectId: string) {
       projectId
     );
 
-  return featureFlags.map((featureFlag) => ({
-    id: featureFlag._id.toString(),
-    name: featureFlag.name,
-    key: featureFlag.key,
-    description: featureFlag.description,
-    status: featureFlag.status,
-    rolloutPercentage: featureFlag.rolloutPercentage,
-    createdAt: featureFlag.createdAt,
-  }));
+  return serializeDocs(featureFlags);
 }
 async getFeatureFlagById(id: string) {
   const featureFlag =
@@ -217,18 +194,7 @@ async getFeatureFlagById(id: string) {
     throw new NotFoundError('Feature flag not found');
   }
 
-  return {
-    id: featureFlag._id.toString(),
-    name: featureFlag.name,
-    key: featureFlag.key,
-    description: featureFlag.description,
-    status: featureFlag.status,
-    rolloutPercentage: featureFlag.rolloutPercentage,
-    projectId: featureFlag.projectId,
-    createdBy: featureFlag.createdBy,
-    createdAt: featureFlag.createdAt,
-    updatedAt: featureFlag.updatedAt,
-  };
+  return serializeDoc(featureFlag)!;
 }
 async deleteFeatureFlag(id: string) {
   const featureFlag =

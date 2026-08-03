@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { OrganizationInvitationService } from './organization-invitation.service';
 import { asyncHandler } from '../utils/asyncHandler';
+import { serializeDoc, serializeDocs } from '../utils/serialize';
 
 export class OrganizationInvitationController {
   private organizationInvitationService =
@@ -19,7 +20,7 @@ sendInvitation = asyncHandler(
 
     res.status(201).json({
       success: true,
-      data: invitation,
+      data: serializeDoc(invitation),
     });
   }
 );
@@ -35,7 +36,7 @@ acceptInvitation = asyncHandler(
 
     res.status(200).json({
       success: true,
-      data: invitation,
+      data: serializeDoc(invitation),
     });
   }
 );
@@ -51,7 +52,7 @@ rejectInvitation = asyncHandler(
 
     res.status(200).json({
       success: true,
-      data: invitation,
+      data: serializeDoc(invitation),
     });
   }
 );
@@ -67,7 +68,7 @@ cancelInvitation = asyncHandler(
 
     res.status(200).json({
       success: true,
-      data: invitation,
+      data: serializeDoc(invitation),
     });
   }
 );
@@ -82,7 +83,7 @@ getOrganizationInvitations = asyncHandler(
 
     res.status(200).json({
       success: true,
-      data: invitations,
+      data: serializeDocs(invitations),
     });
   }
 );
@@ -95,7 +96,7 @@ getMyInvitations = asyncHandler(
 
     res.status(200).json({
       success: true,
-      data: invitations,
+      data: serializeDocs(invitations),
     });
   }
 );

@@ -1,3 +1,4 @@
+import { OrganizationMember } from '../organization-member/organization-member.model';
 import { Organization, IOrganization } from './organization.model';
 
 export class OrganizationRepository {
@@ -13,8 +14,22 @@ export class OrganizationRepository {
     return Organization.findOne({ slug });
   }
 
-  async findByOwner(ownerId: string) {
-    return Organization.find({ ownerId });
+async findByUserId(userId: string) {
+    const memberships = await OrganizationMember.find({ userId }).select(
+      'organizationId'
+    );
+
+    const organizationIds = memberships.map((membership) =>
+      membership.organizationId.toString()
+    );
+
+    if (organizationIds.length === 0) {
+      return [];
+    }
+
+    return Organization.find({
+      _id: { $in: organizationIds },
+    }).sort({ createdAt: -1 });
   }
 
   async update(id: string, data: Partial<IOrganization>) {
