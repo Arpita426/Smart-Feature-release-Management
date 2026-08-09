@@ -128,6 +128,34 @@ export interface FeatureFlag {
   updatedAt: string;
 }
 
+export interface Environment {
+  _id: Id;
+  projectId: Id;
+  name: string;
+  slug: string;
+  description?: string;
+  color?: string;
+  order: number;
+  isDefault: boolean;
+  createdBy: Id;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FeatureConfiguration {
+  _id: Id;
+  featureId: Id;
+  environmentId: Id;
+  enabled: boolean;
+  rolloutPercentage: number;
+  killSwitch: boolean;
+  targetingRules?: Record<string, unknown>;
+  variables?: Record<string, unknown>;
+  updatedBy: Id;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuditLog {
   _id: Id;
   userId: Id | { _id: Id; fullName?: string; email?: string };

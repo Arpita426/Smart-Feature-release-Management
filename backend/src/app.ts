@@ -8,6 +8,7 @@ import organizationInvitationRoutes from './organization-invitation/organization
 import projectRoutes from './project/project.routes';
 import projectMemberRoutes from './project-member/project-member.routes';
 import featureFlagRoutes from './feature-flag/feature-flag.routes';
+import environmentRoutes from './environment/environment.routes';
 import auditRoutes from './audit/audit.routes';
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/v1/organization-invitations', organizationInvitationRoutes);
 app.use('/api/v1/projects', projectRoutes);
 app.use('/api/v1/project-members', projectMemberRoutes);
 app.use('/api/v1/feature-flags', featureFlagRoutes);
+app.use('/api/v1', environmentRoutes);
 app.use('/api/v1/audits', auditRoutes);
 
 app.use(errorHandler);

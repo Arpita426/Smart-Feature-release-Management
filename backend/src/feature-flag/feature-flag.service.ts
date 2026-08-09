@@ -14,11 +14,15 @@ import { AuditRepository } from '../audit/audit.repository';
 import { AuditAction } from '../audit/audit-action';
 import { AuditEntity } from '../audit/audit-entity';
 import { serializeDoc, serializeDocs } from '../utils/serialize';
+import { EnvironmentRepository } from '../environment/environment.repository';
+import { FeatureConfigurationRepository } from '../feature-configuration/feature-configuration.repository';
 
 export class FeatureFlagService {
   private featureFlagRepository = new FeatureFlagRepository();
   private projectRepository = new ProjectRepository();
   private auditRepository = new AuditRepository();
+  private environmentRepository = new EnvironmentRepository();
+  private featureConfigurationRepository = new FeatureConfigurationRepository();
 
   async createFeatureFlag(
     featureFlagData: CreateFeatureFlagInput,
@@ -66,6 +70,23 @@ export class FeatureFlagService {
   AuditEntity.FEATURE_FLAG,
   featureFlag._id
 );
+
+    const environments = await this.environmentRepository.findByProject(featureFlagData.projectId);
+    await Promise.all(
+      environments.map((environment) =>
+        this.featureConfigurationRepository.create({
+          featureId: featureFlag._id,
+          environmentId: environment._id,
+          enabled: false,
+          rolloutPercentage: 0,
+          killSwitch: false,
+          targetingRules: {},
+          variables: {},
+          updatedBy: new Types.ObjectId(userId),
+        })
+      )
+    );
+
     return serializeDoc(featureFlag)!;
   }
 
@@ -113,7 +134,7 @@ export class FeatureFlagService {
     enabled: hash < featureFlag.rolloutPercentage,
   };
 }
-//async toggleFeatureFlag(id: string) 
+//async toggleFeatureFlag(id: string)
 async toggleFeatureFlag(
   id: string,
   userId: string

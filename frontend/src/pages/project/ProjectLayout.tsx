@@ -68,6 +68,7 @@ export default function ProjectLayout() {
         items={[
           { label: 'Overview', to: base, end: true },
           { label: 'Feature flags', to: `${base}/feature-flags` },
+          { label: 'Environments', to: `${base}/environments` },
           { label: 'Members', to: `${base}/members` },
           { label: 'Audit', to: `${base}/audit` },
           { label: 'Settings', to: `${base}/settings` },
