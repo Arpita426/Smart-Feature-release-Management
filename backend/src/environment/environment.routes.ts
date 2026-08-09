@@ -7,6 +7,7 @@ const environmentController = new EnvironmentController();
 
 router.get('/projects/:projectId/environments', authenticate, environmentController.listEnvironments);
 router.post('/projects/:projectId/environments', authenticate, environmentController.createEnvironment);
+router.patch('/projects/:projectId/environments/reorder', authenticate, environmentController.reorderEnvironments);
 router.get('/environments/:environmentId', authenticate, environmentController.getEnvironmentById);
 router.patch('/environments/:environmentId', authenticate, environmentController.updateEnvironment);
 router.delete('/environments/:environmentId', authenticate, environmentController.deleteEnvironment);

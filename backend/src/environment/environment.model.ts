@@ -7,7 +7,7 @@ export interface IEnvironment extends Document {
   description?: string;
   color?: string;
   order: number;
-  isDefault: boolean;
+  isSystem: boolean;
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -51,7 +51,7 @@ const environmentSchema = new Schema<IEnvironment>(
       default: 0,
       min: 0,
     },
-    isDefault: {
+    isSystem: {
       type: Boolean,
       default: false,
     },
@@ -66,6 +66,22 @@ const environmentSchema = new Schema<IEnvironment>(
     timestamps: true,
   }
 );
+
+environmentSchema.pre('validate' as any, function (this: IEnvironment) {
+  if (!this.slug || this.isModified('name')) {
+    const name = this.name?.trim();
+    if (name) {
+      this.slug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }
+  }
+
+  if (typeof this.isSystem !== 'boolean') {
+    this.isSystem = false;
+  }
+});
 
 environmentSchema.index(
   {

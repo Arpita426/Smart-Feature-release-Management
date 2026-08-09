@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { EnvironmentService } from './environment.service';
-import { createEnvironmentSchema, createFeatureConfigurationSchema, updateEnvironmentSchema } from './environment.validation';
+import { createEnvironmentSchema, createFeatureConfigurationSchema, reorderEnvironmentsSchema, updateEnvironmentSchema } from './environment.validation';
 
 export class EnvironmentController {
   private environmentService = new EnvironmentService();
@@ -46,6 +46,16 @@ export class EnvironmentController {
   deleteEnvironment = async (req: Request<{ environmentId: string }>, res: Response, next: NextFunction): Promise<void> => {
     try {
       const result = await this.environmentService.deleteEnvironment(req.params.environmentId, req.user!.userId);
+      res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  reorderEnvironments = async (req: Request<{ projectId: string }>, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const data = reorderEnvironmentsSchema.parse(req.body);
+      const result = await this.environmentService.reorderEnvironments(req.params.projectId, data, req.user!.userId);
       res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);

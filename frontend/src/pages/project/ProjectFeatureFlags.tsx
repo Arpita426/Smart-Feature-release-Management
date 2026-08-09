@@ -1,9 +1,9 @@
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useOutletContext, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Flag, Plus } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
-import { featureFlagApi } from '../../lib/resources';
-import type { FeatureFlag } from '../../types';
+import { environmentApi, featureConfigurationApi, featureFlagApi } from '../../lib/resources';
+import type { Environment, FeatureConfiguration, FeatureFlag } from '../../types';
 import {
   Badge,
   Button,
@@ -24,18 +24,64 @@ const PAGE_SIZE = 8;
 export default function ProjectFeatureFlags() {
   const { project } = useOutletContext<ProjectOutletContext>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [flags, setFlags] = useState<FeatureFlag[] | null>(null);
+  const [environments, setEnvironments] = useState<Environment[]>([]);
+  const [configurations, setConfigurations] = useState<Record<string, FeatureConfiguration | null>>({});
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string | null>(null);
 
   useEffect(() => {
     featureFlagApi
       .listByProject(project._id)
       .then(setFlags)
       .catch((err) => setError(err instanceof Error ? err.message : 'Could not load feature flags.'));
+
+    environmentApi
+      .listByProject(project._id)
+      .then((result) => {
+        setEnvironments(result);
+        const requestedEnvironmentId = searchParams.get('environmentId');
+        const fallbackEnvironment = result.find((item) => item._id === requestedEnvironmentId) ?? result[0];
+        if (fallbackEnvironment) {
+          setSelectedEnvironmentId(fallbackEnvironment._id);
+        }
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Could not load environments.'));
   }, [project._id]);
+
+  useEffect(() => {
+    if (!selectedEnvironmentId || !flags?.length) {
+      setConfigurations({});
+      return;
+    }
+
+    let isMounted = true;
+    Promise.all(
+      flags.map(async (flag) => {
+        try {
+          const config = await featureConfigurationApi.getByEnvironment(flag._id, selectedEnvironmentId);
+          return [flag._id, config] as const;
+        } catch {
+          return [flag._id, null] as const;
+        }
+      })
+    ).then((results) => {
+      if (!isMounted) return;
+      const next: Record<string, FeatureConfiguration | null> = {};
+      results.forEach(([flagId, config]) => {
+        next[flagId] = config;
+      });
+      setConfigurations(next);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [flags, selectedEnvironmentId]);
 
   const filtered = useMemo(() => {
     if (!flags) return [];
@@ -43,6 +89,8 @@ export default function ProjectFeatureFlags() {
     if (!q) return flags;
     return flags.filter((f) => f.name.toLowerCase().includes(q) || f.key.toLowerCase().includes(q));
   }, [flags, query]);
+
+  const selectedEnvironment = environments.find((environment) => environment._id === selectedEnvironmentId) ?? environments[0] ?? null;
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -69,16 +117,17 @@ export default function ProjectFeatureFlags() {
       render: (f) => <Badge tone={f.status === 'ENABLED' ? 'success' : 'neutral'}>{f.status}</Badge>,
     },
     {
-      key: 'rollout',
-      header: 'Rollout',
-      render: (f) => (
-        <div className="flex items-center gap-2 w-32">
-          <div className="flex-1 h-1.5 rounded-full bg-bg-inset overflow-hidden">
-            <div className="h-full bg-brand rounded-full" style={{ width: `${f.rolloutPercentage}%` }} />
+      key: 'environment',
+      header: 'Environment config',
+      render: (f) => {
+        const config = configurations[f._id];
+        return (
+          <div className="flex flex-col gap-1">
+            <Badge tone={config?.enabled ? 'success' : 'neutral'}>{config?.enabled ? 'Enabled' : 'Disabled'}</Badge>
+            <span className="text-xs text-fg-muted">{config?.rolloutPercentage ?? f.rolloutPercentage}% rollout</span>
           </div>
-          <span className="font-mono-nums text-xs text-fg-muted w-8 text-right">{f.rolloutPercentage}%</span>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: 'updated',
@@ -87,9 +136,33 @@ export default function ProjectFeatureFlags() {
     },
   ];
 
+  function handleEnvironmentChange(environment: Environment) {
+    setSelectedEnvironmentId(environment._id);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set('environmentId', environment._id);
+      return next;
+    });
+  }
+
   return (
     <div>
       <p className="text-sm text-fg-muted mb-4">Control gradual rollout and targeting of feature releases.</p>
+      {environments.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {environments.map((environment) => (
+            <button
+              key={environment._id}
+              type="button"
+              onClick={() => handleEnvironmentChange(environment)}
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm transition-colors ${selectedEnvironment?._id === environment._id ? 'border-brand bg-brand/10 text-brand' : 'border-border bg-surface text-fg-muted hover:bg-surface-hover'}`}
+            >
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: environment.color || '#2563eb' }} />
+              {environment.name}
+            </button>
+          ))}
+        </div>
+      )}
       <TableToolbar
         searchValue={query}
         onSearchChange={setQuery}
@@ -130,6 +203,11 @@ export default function ProjectFeatureFlags() {
         />
       ) : (
         <>
+          {selectedEnvironment && (
+            <div className="mb-4 rounded-lg border border-border bg-bg-inset/40 px-3 py-2 text-sm text-fg-muted">
+              Showing feature flag configuration for <span className="font-medium text-fg">{selectedEnvironment.name}</span>.
+            </div>
+          )}
           <Table columns={columns} rows={pageRows} onRowClick={(f) => navigate(`/app/feature-flags/${f._id}`)} />
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </>

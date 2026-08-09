@@ -17,6 +17,10 @@ export class FeatureConfigurationRepository {
     return FeatureConfiguration.findByIdAndUpdate(id, data, { new: true });
   }
 
+  async deleteByEnvironment(environmentId: string) {
+    return FeatureConfiguration.deleteMany({ environmentId });
+  }
+
   async upsert(featureId: string, environmentId: string, data: Partial<IFeatureConfiguration>) {
     return FeatureConfiguration.findOneAndUpdate(
       { featureId, environmentId },

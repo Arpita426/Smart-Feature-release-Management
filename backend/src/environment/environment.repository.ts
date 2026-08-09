@@ -17,8 +17,8 @@ export class EnvironmentRepository {
     return Environment.findOne({ projectId, slug });
   }
 
-  async findDefaultByProject(projectId: string) {
-    return Environment.findOne({ projectId, isDefault: true });
+  async findByProjectAndIds(projectId: string, ids: string[]) {
+    return Environment.find({ projectId, _id: { $in: ids } });
   }
 
   async update(id: string, data: Partial<IEnvironment>) {

@@ -11,7 +11,7 @@ import { serializeDoc, serializeDocs } from '../utils/serialize';
 import { generateSlug } from '../utils/slug';
 import { EnvironmentRepository } from './environment.repository';
 import { FeatureConfigurationRepository } from '../feature-configuration/feature-configuration.repository';
-import { CreateEnvironmentInput, CreateFeatureConfigurationInput } from './environment.validation';
+import { CreateEnvironmentInput, CreateFeatureConfigurationInput, ReorderEnvironmentsInput } from './environment.validation';
 
 export class EnvironmentService {
   private environmentRepository = new EnvironmentRepository();
@@ -37,7 +37,19 @@ export class EnvironmentService {
     }
 
     const environments = await this.environmentRepository.findByProject(projectId);
-    return serializeDocs(environments);
+    const normalized = await Promise.all(
+      environments.map(async (environment) => {
+        const normalizedName = environment.name?.trim().toLowerCase();
+        if (environment.isSystem || !['development', 'staging', 'production'].includes(normalizedName)) {
+          return environment;
+        }
+
+        const updated = await this.environmentRepository.update(environment._id.toString(), { isSystem: true });
+        return updated ?? environment;
+      })
+    );
+
+    return serializeDocs(normalized);
   }
 
   async createEnvironment(projectId: string, data: CreateEnvironmentInput, userId: string) {
@@ -69,14 +81,17 @@ export class EnvironmentService {
       throw new ConflictError('Environment already exists in this project');
     }
 
+    const environments = await this.environmentRepository.findByProject(projectId);
+    const maxOrder = environments.reduce((highest, item) => Math.max(highest, item.order ?? 0), 0);
+
     const environment = await this.environmentRepository.create({
       projectId: new Types.ObjectId(projectId),
       name: data.name,
       slug,
       description: data.description ?? '',
       color: data.color ?? '#2563eb',
-      order: data.order ?? 0,
-      isDefault: Boolean(data.isDefault),
+      order: maxOrder + 1,
+      isSystem: false,
       createdBy: new Types.ObjectId(userId),
     });
 
@@ -191,6 +206,12 @@ export class EnvironmentService {
       throw new UnauthorizedError('You are not allowed to delete environments.');
     }
 
+    if (environment.isSystem) {
+      throw new UnauthorizedError('System environments cannot be deleted.');
+    }
+
+    await this.featureConfigurationRepository.deleteByEnvironment(environmentId);
+
     await this.environmentRepository.delete(environmentId);
     return { message: 'Environment deleted successfully' };
   }
@@ -291,5 +312,44 @@ export class EnvironmentService {
     });
 
     return serializeDoc(configuration)!;
+  }
+
+  async reorderEnvironments(projectId: string, data: ReorderEnvironmentsInput, userId: string) {
+    const project = await this.projectRepository.findById(projectId);
+    if (!project) {
+      throw new NotFoundError('Project not found');
+    }
+
+    const organizationMember = await this.organizationMemberRepository.findMember(project.organizationId.toString(), userId);
+    if (!organizationMember) {
+      throw new UnauthorizedError('You are not a member of this organization.');
+    }
+
+    const projectMember = await this.projectMemberRepository.findMember(projectId, userId);
+    const isOrgAdminOrOwner = organizationMember.role === OrganizationRole.OWNER || organizationMember.role === OrganizationRole.ADMIN;
+    const isProjectAdmin = projectMember && projectMember.role === 'OWNER';
+
+    if (!isOrgAdminOrOwner && !isProjectAdmin) {
+      throw new UnauthorizedError('You are not allowed to reorder environments.');
+    }
+
+    const environments = await this.environmentRepository.findByProject(projectId);
+    const availableIds = new Set(environments.map((item) => item._id.toString()));
+    const requestedIds = data.environmentIds.map((value) => value.trim());
+
+    if (requestedIds.length !== new Set(requestedIds).size) {
+      throw new ConflictError('Environment order contains duplicates');
+    }
+
+    const invalidIds = requestedIds.filter((id) => !availableIds.has(id));
+    if (invalidIds.length > 0) {
+      throw new ConflictError('Invalid environment IDs');
+    }
+
+    const updates = requestedIds.map((id, index) => this.environmentRepository.update(id, { order: index }));
+    await Promise.all(updates);
+
+    const reordered = await this.environmentRepository.findByProject(projectId);
+    return serializeDocs(reordered);
   }
 }

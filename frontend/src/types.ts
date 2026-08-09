@@ -136,7 +136,7 @@ export interface Environment {
   description?: string;
   color?: string;
   order: number;
-  isDefault: boolean;
+  isSystem: boolean;
   createdBy: Id;
   createdAt: string;
   updatedAt: string;

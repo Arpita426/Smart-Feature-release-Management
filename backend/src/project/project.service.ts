@@ -87,36 +87,41 @@ if (
   addedBy: new Types.ObjectId(userId),
 });
 
-    await this.environmentRepository.create({
-      projectId: project._id,
-      name: 'Development',
-      slug: 'development',
-      description: 'Development environment',
-      color: '#2563eb',
-      order: 0,
-      isDefault: true,
-      createdBy: new Types.ObjectId(userId),
-    });
+    const existingEnvironments = await this.environmentRepository.findByProject(project._id.toString());
+    if (existingEnvironments.length === 0) {
+      await this.environmentRepository.create({
+        projectId: project._id,
+        name: 'Development',
+        slug: 'development',
+        description: 'Development environment',
+        color: '#10b981',
+        order: 0,
+        isSystem: true,
+        createdBy: new Types.ObjectId(userId),
+      });
 
-    await this.environmentRepository.create({
-      projectId: project._id,
-      name: 'Staging',
-      slug: 'staging',
-      description: 'Staging environment',
-      color: '#7c3aed',
-      order: 1,
-      createdBy: new Types.ObjectId(userId),
-    });
+      await this.environmentRepository.create({
+        projectId: project._id,
+        name: 'Staging',
+        slug: 'staging',
+        description: 'Staging environment',
+        color: '#3b82f6',
+        order: 1,
+        isSystem: true,
+        createdBy: new Types.ObjectId(userId),
+      });
 
-    await this.environmentRepository.create({
-      projectId: project._id,
-      name: 'Production',
-      slug: 'production',
-      description: 'Production environment',
-      color: '#dc2626',
-      order: 2,
-      createdBy: new Types.ObjectId(userId),
-    });
+      await this.environmentRepository.create({
+        projectId: project._id,
+        name: 'Production',
+        slug: 'production',
+        description: 'Production environment',
+        color: '#ef4444',
+        order: 2,
+        isSystem: true,
+        createdBy: new Types.ObjectId(userId),
+      });
+    }
 
     return serializeDoc(project)!;
   }

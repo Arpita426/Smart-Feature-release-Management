@@ -140,15 +140,18 @@ export const featureFlagApi = {
 export const environmentApi = {
   listByProject: (projectId: string) => unwrap<Environment[]>(api.get(`/projects/${projectId}/environments`)),
 
-  create: (projectId: string, input: { name: string; description?: string; color?: string; order?: number; isDefault?: boolean }) =>
+  create: (projectId: string, input: { name: string; description?: string; color?: string }) =>
     unwrap<Environment>(api.post(`/projects/${projectId}/environments`, input)),
 
   getById: (environmentId: string) => unwrap<Environment>(api.get(`/environments/${environmentId}`)),
 
-  update: (environmentId: string, input: { name?: string; description?: string; color?: string; order?: number; isDefault?: boolean }) =>
+  update: (environmentId: string, input: { name?: string; description?: string; color?: string }) =>
     unwrap<Environment>(api.patch(`/environments/${environmentId}`, input)),
 
   remove: (environmentId: string) => unwrap<{ success: boolean }>(api.delete(`/environments/${environmentId}`)),
+
+  reorder: (projectId: string, environmentIds: string[]) =>
+    unwrap<Environment[]>(api.patch(`/projects/${projectId}/environments/reorder`, { environmentIds })),
 };
 
 export const featureConfigurationApi = {
