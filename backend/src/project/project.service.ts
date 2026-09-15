@@ -12,6 +12,7 @@ import { OrganizationMemberRepository } from '../organization-member/organizatio
 import { OrganizationRole } from '../organization-member/organization-role';
 import { UnauthorizedError } from '../errors/UnauthorizedError';
 import { serializeDoc, serializeDocs } from '../utils/serialize';
+import { EnvironmentRepository } from '../environment/environment.repository';
 
 export class ProjectService {
   private projectRepository = new ProjectRepository();
@@ -20,6 +21,7 @@ export class ProjectService {
   new ProjectMemberRepository();
   private organizationMemberRepository =
   new OrganizationMemberRepository();
+  private environmentRepository = new EnvironmentRepository();
   async createProject(
     projectData: CreateProjectInput,
     userId: string
@@ -84,6 +86,43 @@ if (
   role: ProjectRole.OWNER,
   addedBy: new Types.ObjectId(userId),
 });
+
+    const existingEnvironments = await this.environmentRepository.findByProject(project._id.toString());
+    if (existingEnvironments.length === 0) {
+      await this.environmentRepository.create({
+        projectId: project._id,
+        name: 'Development',
+        slug: 'development',
+        description: 'Development environment',
+        color: '#10b981',
+        order: 0,
+        isSystem: true,
+        createdBy: new Types.ObjectId(userId),
+      });
+
+      await this.environmentRepository.create({
+        projectId: project._id,
+        name: 'Staging',
+        slug: 'staging',
+        description: 'Staging environment',
+        color: '#3b82f6',
+        order: 1,
+        isSystem: true,
+        createdBy: new Types.ObjectId(userId),
+      });
+
+      await this.environmentRepository.create({
+        projectId: project._id,
+        name: 'Production',
+        slug: 'production',
+        description: 'Production environment',
+        color: '#ef4444',
+        order: 2,
+        isSystem: true,
+        createdBy: new Types.ObjectId(userId),
+      });
+    }
+
     return serializeDoc(project)!;
   }
 

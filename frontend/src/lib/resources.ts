@@ -1,6 +1,8 @@
 import { api, unwrap } from './api';
 import type {
   AuditLog,
+  Environment,
+  FeatureConfiguration,
   FeatureFlag,
   LoginResult,
   Organization,
@@ -133,4 +135,31 @@ export const featureFlagApi = {
     unwrap<{ enabled: boolean }>(
       api.get('/feature-flags/evaluate', { params: { projectId, key, userId } })
     ),
+};
+
+export const environmentApi = {
+  listByProject: (projectId: string) => unwrap<Environment[]>(api.get(`/projects/${projectId}/environments`)),
+
+  create: (projectId: string, input: { name: string; description?: string; color?: string }) =>
+    unwrap<Environment>(api.post(`/projects/${projectId}/environments`, input)),
+
+  getById: (environmentId: string) => unwrap<Environment>(api.get(`/environments/${environmentId}`)),
+
+  update: (environmentId: string, input: { name?: string; description?: string; color?: string }) =>
+    unwrap<Environment>(api.patch(`/environments/${environmentId}`, input)),
+
+  remove: (environmentId: string) => unwrap<{ success: boolean }>(api.delete(`/environments/${environmentId}`)),
+
+  reorder: (projectId: string, environmentIds: string[]) =>
+    unwrap<Environment[]>(api.patch(`/projects/${projectId}/environments/reorder`, { environmentIds })),
+};
+
+export const featureConfigurationApi = {
+  listByFeature: (featureFlagId: string) => unwrap<FeatureConfiguration[]>(api.get(`/feature-flags/${featureFlagId}/configurations`)),
+
+  getByEnvironment: (featureFlagId: string, environmentId: string) =>
+    unwrap<FeatureConfiguration>(api.get(`/feature-flags/${featureFlagId}/configurations/${environmentId}`)),
+
+  update: (featureFlagId: string, environmentId: string, input: { enabled?: boolean; rolloutPercentage?: number; killSwitch?: boolean; targetingRules?: Record<string, unknown>; variables?: Record<string, unknown> }) =>
+    unwrap<FeatureConfiguration>(api.patch(`/feature-flags/${featureFlagId}/configurations/${environmentId}`, input)),
 };
