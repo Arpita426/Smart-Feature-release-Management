@@ -21,13 +21,58 @@ export const ProjectRole = {
 } as const;
 export type ProjectRole = (typeof ProjectRole)[keyof typeof ProjectRole];
 
+// export const InvitationStatus = {
+//   PENDING: 'PENDING',
+//   ACCEPTED: 'ACCEPTED',
+//   REJECTED: 'REJECTED',
+//   CANCELLED: 'CANCELLED',
+// } as const;
+// export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus];
+
+export const InvitationScope = {
+  ORGANIZATION: 'ORGANIZATION',
+  PROJECT: 'PROJECT',
+  FEATURE: 'FEATURE',
+} as const;
+
+export type InvitationScope =
+  (typeof InvitationScope)[keyof typeof InvitationScope];
+
 export const InvitationStatus = {
   PENDING: 'PENDING',
   ACCEPTED: 'ACCEPTED',
   REJECTED: 'REJECTED',
   CANCELLED: 'CANCELLED',
 } as const;
-export type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus];
+
+export type InvitationStatus =
+  (typeof InvitationStatus)[keyof typeof InvitationStatus];
+
+export interface OrganizationInvitation {
+  _id: Id;
+  organizationId: Id;
+  scope: InvitationScope;
+  targetId: Id;
+  targetName?: string;
+  email: string;
+  inviteeId?: Id;
+  role?: OrganizationRole | ProjectRole;
+  permissions?: string[];
+  invitedBy:
+  | Id
+  | {
+      _id: Id;
+      fullName?: string;
+      email?: string;
+    };
+  status: InvitationStatus;
+  expiresAt: string;
+  acceptedAt?: string;
+  respondedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 
 export const FeatureFlagStatus = {
   ENABLED: 'ENABLED',
@@ -75,16 +120,16 @@ export interface Organization {
   updatedAt: string;
 }
 
-export interface OrganizationInvitation {
-  _id: Id;
-  organizationId: Id;
-  email: string;
-  invitedBy: Id;
-  status: InvitationStatus;
-  respondedAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// export interface OrganizationInvitation {
+//   _id: Id;
+//   organizationId: Id;
+//   email: string;
+//   invitedBy: Id;
+//   status: InvitationStatus;
+//   respondedAt?: string;
+//   createdAt: string;
+//   updatedAt: string;
+// }
 
 export interface Project {
   _id: Id;

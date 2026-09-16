@@ -28,6 +28,10 @@ const ProjectEnvironments = lazy(() => import('./pages/project/ProjectEnvironmen
 const ProjectMembers = lazy(() => import('./pages/project/ProjectMembers'));
 const ProjectAudit = lazy(() => import('./pages/project/ProjectAudit'));
 const ProjectSettings = lazy(() => import('./pages/project/ProjectSettings'));
+const AcceptInvitation = lazy(
+  () => import('./pages/AcceptInvitation')
+);
+
 
 function PageFallback() {
   return (
@@ -54,6 +58,7 @@ export default function App() {
                 <Route element={<Layout />}>
                   <Route path="/app" element={<Dashboard />} />
                   <Route path="/app/invitations" element={<Invitations />} />
+                  <Route path="/app/invitations/accept" element={<AcceptInvitation />} />
                   <Route path="/app/feature-flags/:flagId" element={<FeatureFlagDetail />} />
 
                   <Route path="/app/organizations/:orgId" element={<OrganizationLayout />}>

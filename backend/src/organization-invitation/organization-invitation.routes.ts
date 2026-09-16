@@ -3,6 +3,11 @@ import { OrganizationInvitationController } from './organization-invitation.cont
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
 // import { validate } from '../middleware/validate';
+import {
+  sendFeatureInvitationSchema,
+  sendInvitationSchema,
+  sendProjectInvitationSchema,
+} from './organization-invitation.validation';
 
 const router = Router();
 const controller = new OrganizationInvitationController();
@@ -29,6 +34,20 @@ router.patch(
   controller.cancelInvitation
 );
 
+router.post(
+  '/projects/:projectId/invitations',
+  authenticate,
+  authorize,
+  controller.sendProjectInvitation
+);
+
+router.post(
+  '/features/:featureId/invitations',
+  authenticate,
+  authorize,
+  controller.sendFeatureInvitation
+);
+
 // User
 router.get(
   '/users/me/invitations',
@@ -36,8 +55,8 @@ router.get(
   controller.getMyInvitations
 );
 
-router.patch(
-  '/users/me/invitations/:invitationId/accept',
+router.post(
+  '/users/me/invitations/accept',
   authenticate,
   controller.acceptInvitation
 );
@@ -46,6 +65,12 @@ router.patch(
   '/users/me/invitations/:invitationId/reject',
   authenticate,
   controller.rejectInvitation
+);
+
+router.get(
+  '/users/me/invitations/preview',
+  authenticate,
+  controller.previewInvitation
 );
 
 export default router;

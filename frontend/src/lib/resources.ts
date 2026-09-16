@@ -9,6 +9,7 @@ import type {
   OrganizationInvitation,
   Project,
   ProjectMember,
+  ProjectRole,
   RegisterResult,
   User,
 } from '../types';
@@ -45,36 +46,95 @@ export const organizationApi = {
     unwrap<any[]>(api.get(`/organizations/${id}/members`)),
 };
 
-// ---------- Organization invitations ----------
+// ---------- Invitations ----------
 export const invitationApi = {
+  // Organization invitation
   send: (organizationId: string, email: string) =>
     unwrap<OrganizationInvitation>(
-      api.post(`/organization-invitations/organizations/${organizationId}/invitations`, { email })
+      api.post(
+        `/organization-invitations/organizations/${organizationId}/invitations`,
+        { email }
+      )
     ),
 
+  // Project invitation
+  sendProject: (
+    projectId: string,
+    email: string,
+    role: ProjectRole
+  ) =>
+    unwrap<OrganizationInvitation>(
+      api.post(
+        `/organization-invitations/projects/${projectId}/invitations`,
+        { email, role }
+      )
+    ),
+
+  // Feature invitation
+  sendFeature: (
+    featureId: string,
+    email: string,
+    permissions: string[]
+  ) =>
+    unwrap<OrganizationInvitation>(
+      api.post(
+        `/organization-invitations/features/${featureId}/invitations`,
+        { email, permissions }
+      )
+    ),
+
+  // Organization invitations
   listForOrganization: (organizationId: string) =>
     unwrap<OrganizationInvitation[]>(
-      api.get(`/organization-invitations/organizations/${organizationId}/invitations`)
+      api.get(
+        `/organization-invitations/organizations/${organizationId}/invitations`
+      )
     ),
 
-  cancel: (organizationId: string, invitationId: string) =>
+  // Cancel invitation
+  cancel: (
+    organizationId: string,
+    invitationId: string
+  ) =>
     unwrap<OrganizationInvitation>(
       api.patch(
         `/organization-invitations/organizations/${organizationId}/invitations/${invitationId}/cancel`
       )
     ),
 
+  // Current user's invitations
   listMine: () =>
-    unwrap<OrganizationInvitation[]>(api.get('/organization-invitations/users/me/invitations')),
-
-  accept: (invitationId: string) =>
-    unwrap<OrganizationInvitation>(
-      api.patch(`/organization-invitations/users/me/invitations/${invitationId}/accept`)
+    unwrap<OrganizationInvitation[]>(
+      api.get(
+        '/organization-invitations/users/me/invitations'
+      )
     ),
 
+    preview: (token: string) =>
+  unwrap<OrganizationInvitation>(
+    api.get(
+      '/organization-invitations/users/me/invitations/preview',
+      {
+        params: { token },
+      }
+    )
+  ),
+  
+  // Accept invitation using secure token
+  accept: (token: string) =>
+    unwrap<OrganizationInvitation>(
+      api.post(
+        '/organization-invitations/users/me/invitations/accept',
+        { token }
+      )
+    ),
+
+  // Reject invitation
   reject: (invitationId: string) =>
     unwrap<OrganizationInvitation>(
-      api.patch(`/organization-invitations/users/me/invitations/${invitationId}/reject`)
+      api.patch(
+        `/organization-invitations/users/me/invitations/${invitationId}/reject`
+      )
     ),
 };
 
