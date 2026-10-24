@@ -1,25 +1,55 @@
-# Dependencies
-**/node_modules/
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
 
-# Build
-**/dist/
+# Build output
+dist/
+build/
+.next/
+out/
 
-# Environment
-**/.env
-**/.env.local
-**/.env.production
+# Environment variables
+.env
+.env.*
 
 # Logs
 logs/
 *.log
+pids/
+*.pid
+*.seed
 
-# Coverage
+# Coverage reports
 coverage/
 
-# IDE
-.vscode/
-.idea/
-
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
+
+# IDE and editor folders
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Python caches and build artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+*.manifest
+*.spec
+
+# Miscellaneous
+*.tgz
+*.zip
+*.gz
+*.cache
+.tmp
+.temp

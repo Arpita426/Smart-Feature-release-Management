@@ -25,6 +25,7 @@ const ProjectLayout = lazy(() => import('./pages/project/ProjectLayout'));
 const ProjectOverview = lazy(() => import('./pages/project/ProjectOverview'));
 const ProjectFeatureFlags = lazy(() => import('./pages/project/ProjectFeatureFlags'));
 const ProjectEnvironments = lazy(() => import('./pages/project/ProjectEnvironments'));
+const ProjectSDKKeys = lazy(() => import('./pages/project/ProjectSDKKeys'));
 const ProjectMembers = lazy(() => import('./pages/project/ProjectMembers'));
 const ProjectAudit = lazy(() => import('./pages/project/ProjectAudit'));
 const ProjectSettings = lazy(() => import('./pages/project/ProjectSettings'));
@@ -73,6 +74,7 @@ export default function App() {
                     <Route index element={<ProjectOverview />} />
                     <Route path="feature-flags" element={<ProjectFeatureFlags />} />
                     <Route path="environments" element={<ProjectEnvironments />} />
+                    <Route path="sdk-keys" element={<ProjectSDKKeys />} />
                     <Route path="members" element={<ProjectMembers />} />
                     <Route path="audit" element={<ProjectAudit />} />
                     <Route path="settings" element={<ProjectSettings />} />

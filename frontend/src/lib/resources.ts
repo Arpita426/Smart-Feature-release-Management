@@ -11,6 +11,8 @@ import type {
   ProjectMember,
   ProjectRole,
   RegisterResult,
+  SDKKey,
+  SDKKeyCreatedResponse,
   User,
 } from '../types';
 
@@ -223,3 +225,19 @@ export const featureConfigurationApi = {
   update: (featureFlagId: string, environmentId: string, input: { enabled?: boolean; rolloutPercentage?: number; killSwitch?: boolean; targetingRules?: Record<string, unknown>; variables?: Record<string, unknown> }) =>
     unwrap<FeatureConfiguration>(api.patch(`/feature-flags/${featureFlagId}/configurations/${environmentId}`, input)),
 };
+
+// ---------- SDK Keys ----------
+export const sdkKeyApi = {
+  list: (projectId: string, environmentId: string) =>
+    unwrap<SDKKey[]>(api.get(`/projects/${projectId}/environments/${environmentId}/sdk-keys`)),
+
+  create: (projectId: string, environmentId: string, input: { name: string; expiresAt?: string | null }) =>
+    unwrap<SDKKeyCreatedResponse>(api.post(`/projects/${projectId}/environments/${environmentId}/sdk-keys`, input)),
+
+  revoke: (projectId: string, environmentId: string, keyId: string) =>
+    unwrap<SDKKey>(api.delete(`/projects/${projectId}/environments/${environmentId}/sdk-keys/${keyId}`)),
+
+  regenerate: (projectId: string, environmentId: string, keyId: string) =>
+    unwrap<SDKKeyCreatedResponse>(api.post(`/projects/${projectId}/environments/${environmentId}/sdk-keys/${keyId}/regenerate`)),
+};
+

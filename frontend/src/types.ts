@@ -211,8 +211,33 @@ export interface AuditLog {
   updatedAt: string;
 }
 
+export const SDKKeyStatus = {
+  ACTIVE: 'ACTIVE',
+  REVOKED: 'REVOKED',
+} as const;
+export type SDKKeyStatus = (typeof SDKKeyStatus)[keyof typeof SDKKeyStatus];
+
+export interface SDKKey {
+  _id: Id;
+  projectId: Id;
+  environmentId: Id;
+  name: string;
+  keyPrefix: string;
+  status: SDKKeyStatus;
+  lastUsedAt?: string | null;
+  expiresAt?: string | null;
+  createdBy: Id | { _id: Id; fullName?: string; email?: string };
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SDKKeyCreatedResponse extends SDKKey {
+  key: string;
+}
+
 export interface ApiEnvelope<T> {
   success: boolean;
   data: T;
   message?: string;
 }
+

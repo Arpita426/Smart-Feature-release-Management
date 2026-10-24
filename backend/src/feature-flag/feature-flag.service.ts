@@ -134,12 +134,10 @@ export class FeatureFlagService {
     enabled: hash < featureFlag.rolloutPercentage,
   };
 }
-//async toggleFeatureFlag(id: string)
 async toggleFeatureFlag(
   id: string,
   userId: string
-)
-{
+) {
   const featureFlag =
     await this.featureFlagRepository.findById(id);
 
@@ -152,18 +150,37 @@ async toggleFeatureFlag(
       ? FeatureFlagStatus.DISABLED
       : FeatureFlagStatus.ENABLED;
 
+  const newEnabled = newStatus === FeatureFlagStatus.ENABLED;
+
+  // 1. Update the global FeatureFlag.status
   const updatedFeatureFlag =
     await this.featureFlagRepository.toggleStatus(
       id,
       newStatus
     );
-    ///
-    await this.auditRepository.create(
-  new Types.ObjectId(featureFlag.createdBy),
-  AuditAction.TOGGLE_FEATURE_FLAG,
-  AuditEntity.FEATURE_FLAG,
-  featureFlag._id
-);
+
+  // 2. Propagate enabled state to ALL per-environment FeatureConfiguration docs.
+  //    Only update `enabled`; preserve rolloutPercentage, killSwitch,
+  //    targetingRules, variables, and other fields.
+  const configurations =
+    await this.featureConfigurationRepository.findByFeature(id);
+
+  await Promise.all(
+    configurations.map((config) =>
+      this.featureConfigurationRepository.update(
+        config._id.toString(),
+        { enabled: newEnabled, updatedBy: new Types.ObjectId(userId) }
+      )
+    )
+  );
+
+  await this.auditRepository.create(
+    new Types.ObjectId(userId),
+    AuditAction.TOGGLE_FEATURE_FLAG,
+    AuditEntity.FEATURE_FLAG,
+    featureFlag._id
+  );
+
   return serializeDoc(updatedFeatureFlag!)!;
 }
 async updateRolloutPercentage(

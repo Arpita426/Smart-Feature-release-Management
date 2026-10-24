@@ -69,6 +69,7 @@ export default function ProjectLayout() {
           { label: 'Overview', to: base, end: true },
           { label: 'Feature flags', to: `${base}/feature-flags` },
           { label: 'Environments', to: `${base}/environments` },
+          { label: 'SDK Keys', to: `${base}/sdk-keys` },
           { label: 'Members', to: `${base}/members` },
           { label: 'Audit', to: `${base}/audit` },
           { label: 'Settings', to: `${base}/settings` },

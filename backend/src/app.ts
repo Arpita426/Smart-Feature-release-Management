@@ -10,6 +10,8 @@ import projectMemberRoutes from './project-member/project-member.routes';
 import featureFlagRoutes from './feature-flag/feature-flag.routes';
 import environmentRoutes from './environment/environment.routes';
 import auditRoutes from './audit/audit.routes';
+import sdkKeyRoutes from './sdk-key/sdk-key.routes';
+import sdkRoutes from './sdk/sdk.routes';
 
 const app = express();
 
@@ -32,7 +34,11 @@ app.use('/api/v1/project-members', projectMemberRoutes);
 app.use('/api/v1/feature-flags', featureFlagRoutes);
 app.use('/api/v1', environmentRoutes);
 app.use('/api/v1/audits', auditRoutes);
+app.use('/api/v1', sdkKeyRoutes);
+app.use('/api/v1/sdk', sdkRoutes);
+app.use('/api/sdk', sdkRoutes);
 
 app.use(errorHandler);
 
 export default app;
+
